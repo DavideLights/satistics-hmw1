@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>secp256k1 Point Multiplication & Coordinate Distribution</title>
+  <meta name="description" content="Interactive visualization of Elliptic Curve Point Multiplication on secp256k1 (Naive vs Double-and-Add) with 2D coordinate scatter distribution and cryptographic analysis.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>secp256k1 Point Multiplication &amp; Coordinate Distribution</h1>
+      <p>Visualizing scalar multiplication <em>Q = kG</em> and intermediate point scattering over &Fopf;<sub><em>p</em></sub></p>
+    </header>
+
+    <!-- 1. Header & Parameters Panel -->
+    <section class="panel" id="parameters-panel">
+      <div class="panel-title">1. Curve Parameters (secp256k1)</div>
+      <div class="param-grid">
+        <span class="param-label">Equation:</span>
+        <span class="param-value">y&sup2; = x&sup3; + ax + b (mod p) with a = 0, b = 7</span>
+
+        <span class="param-label">Prime Field (p):</span>
+        <span class="param-value">0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F (2&sup2;&sup5;&sup6; - 2&sup3;&sup2; - 977)</span>
+
+        <span class="param-label">Generator G<sub>x</sub>:</span>
+        <span class="param-value">0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798</span>
+
+        <span class="param-label">Generator G<sub>y</sub>:</span>
+        <span class="param-value">0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8</span>
+
+        <span class="param-label">Subgroup Order (n):</span>
+        <span class="param-value">0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141</span>
+      </div>
+    </section>
+
+    <!-- 2. Controls Panel -->
+    <section class="panel" id="controls-panel">
+      <div class="panel-title">2. Execution Controls</div>
+      <div class="controls-grid">
+        <div class="control-group">
+          <label for="privateKey">Scalar Multiplier / Private Key (k):</label>
+          <input type="number" id="privateKey" min="1" max="1000000" value="23" placeholder="e.g. 23">
+          <span class="control-hint">Keep k &le; 1000 when testing Naive method.</span>
+        </div>
+
+        <div class="control-group">
+          <label for="methodSelect">Multiplication Algorithm:</label>
+          <select id="methodSelect">
+            <option value="double_and_add" selected>Double-and-Add (O(log k) steps)</option>
+            <option value="naive">Naive Linear: G + G + ... (O(k) steps)</option>
+          </select>
+          <span class="control-hint">Double-and-Add uses binary decomposition.</span>
+        </div>
+
+        <div class="control-group">
+          <label for="delaySlider">Step Delay (ms):</label>
+          <div class="range-wrap">
+            <input type="range" id="delaySlider" min="50" max="1000" step="25" value="200">
+            <span class="range-val" id="delayValue">200 ms</span>
+          </div>
+          <span class="control-hint">Adjust animation playback speed.</span>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button id="btnRun" type="button">Run Multiplication</button>
+        <button id="btnReset" class="btn-secondary" type="button">Reset</button>
+      </div>
+    </section>
+
+    <!-- 3. Visual Execution & Plot Panel (2-Column Grid) -->
+    <section class="panel" id="execution-panel">
+      <div class="panel-title">3. Visual Execution &amp; Coordinate Scatter Plot</div>
+      <div class="exec-grid">
+        <!-- Left Column: Algorithm Trace -->
+        <div class="trace-col">
+          <div class="trace-item">
+            <span class="trace-label">Binary Expansion of k:</span>
+            <div class="binary-display" id="binaryDisplay">
+              <span class="bit-cell">Press Run to inspect binary expansion</span>
+            </div>
+          </div>
+
+          <div class="trace-item">
+            <span class="trace-label">Current Step &amp; Operation:</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="trace-value" id="stepCounter">Step: 0 / 0</span>
+              <span class="op-badge idle" id="opBadge">IDLE</span>
+            </div>
+          </div>
+
+          <div class="trace-item">
+            <span class="trace-label">Live Intermediate Coordinates Q = (x, y):</span>
+            <div class="trace-value" style="font-size: 11px; margin-top: 4px;">
+              <div><strong>Q<sub>x</sub>:</strong> <span id="coordX">None (not started)</span></div>
+              <div style="margin-top: 3px;"><strong>Q<sub>y</sub>:</strong> <span id="coordY">None (not started)</span></div>
+            </div>
+          </div>
+
+          <div class="trace-item">
+            <span class="trace-label">Step Log:</span>
+            <div class="log-box" id="logBox">
+              <div class="log-entry">Waiting for execution...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: 2D Coordinate Scatter Canvas -->
+        <div class="plot-col">
+          <div class="view-tabs" id="viewTabs">
+            <button type="button" class="view-tab active" data-view="real">Continuous Curve (&reals;)</button>
+            <button type="button" class="view-tab" data-view="discrete">Discrete Curve (&Fopf;<sub>97</sub>)</button>
+            <button type="button" class="view-tab" data-view="finite">secp256k1 Scatter (&Fopf;<sub>p</sub>)</button>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="plotCanvas" width="400" height="400"></canvas>
+          </div>
+          <div class="plot-legend">
+            <div class="legend-items">
+              <div class="legend-item">
+                <span class="legend-swatch past"></span>
+                <span id="legendPastText">Visited Points</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-swatch current"></span>
+                <span id="legendCurText">Current Q</span>
+              </div>
+            </div>
+            <span id="pointCounter">Points plotted: 0</span>
+          </div>
+          <div class="plot-caption" id="plotCaption">
+            Showing continuous curve y&sup2; = x&sup3; + 7 over &reals;. Switch tabs to view discrete finite field curves.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Statistical & Cryptographic Analysis Section -->
+    <section id="analysis" class="panel">
+      <h2>Statistical and Cryptographic Properties of <em>Q = kG</em> on secp256k1</h2>
+      <p>
+        In the finite field &Fopf;<sub><em>p</em></sub> of <code>secp256k1</code>, the <em>x</em> and <em>y</em> coordinates of generated points <em>Q = kG</em> exhibit an <strong>apparent uniformity</strong> across the interval [0, <em>p</em> &minus; 1]. Because the generator <em>G</em> creates a prime-order cyclic subgroup of size <em>n</em> &approx; <em>p</em>, the <strong>distribution of <em>x</em> and <em>y</em> coordinates</strong> over the full cycle is nearly flat. Specifically, regarding the <strong>frequency of individual values</strong>, any valid <em>x</em> coordinate appears at most twice (corresponding to +<em>y</em> and &minus;<em>y</em> mod <em>p</em>), and roughly half of the elements in &Fopf;<sub><em>p</em></sub> are valid <em>x</em> coordinates (when <em>x</em><sup>3</sup> + 7 is a quadratic residue modulo <em>p</em>). Consequently, the <strong>distribution of bits</strong> within <em>Q<sub>x</sub></em> and <em>Q<sub>y</sub></em> approaches a Bernoulli(0.5) process, showing balanced 0s and 1s without local clustering. Furthermore, incrementing the scalar <em>k</em> &rarr; <em>k</em> + 1 causes a nonlinear modular inversion during point addition, destroying linear <strong>correlations between input and output</strong> and producing a strong <strong>avalanche-like behaviour</strong> where flipping a single bit in <em>k</em> flips approximately 50% of the bits in <em>Q</em>.
+      </p>
+      <p>
+        However, it is critical to distinguish between properties required for a <strong>cryptographic one-way function</strong> (like Elliptic Curve scalar multiplication) and those strictly required for <strong>cryptographic hash functions</strong>. For <em>Q = kG</em> to act as a secure one-way trapdoor, the essential property is algebraic: the computational intractability of the Elliptic Curve Discrete Logarithm Problem (ECDLP) and the absence of exploitable input-output correlations that would allow recovering <em>k</em> from <em>Q</em> faster than &Omicron;(&radic;<em>n</em>). Conversely, bit-level uniformity, strict avalanche criteria, and flat value frequencies are core design metrics of <strong>cryptographic hash functions</strong> (e.g., SHA-256) to guarantee preimage and collision resistance on unstructured bitstrings. In ECC, apparent uniformity and avalanche effects are statistical byproducts of modular inversion over a large prime field, not the source of security itself—which is why raw EC coordinates should still be passed through a Key Derivation Function (KDF) or hash function before being used as symmetric keys.
+      </p>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,447 @@
+/* secp256k1 Point Multiplication - Style
+   Palette:
+   - Background: #FFFFFF
+   - Text: #111111
+   - Borders: #CCCCCC
+   - Accent/Highlight: #0055FF
+   - Muted text: #555555
+   - No gradients, shadows, or icons.
+*/
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #FFFFFF;
+  color: #111111;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 24px 16px 60px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Header */
+header {
+  margin-bottom: 24px;
+  border-bottom: 2px solid #111111;
+  padding-bottom: 16px;
+}
+
+header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111111;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+header p {
+  color: #555555;
+  font-size: 14px;
+}
+
+/* Sections */
+.panel {
+  border: 1px solid #CCCCCC;
+  padding: 20px;
+  margin-bottom: 24px;
+  background-color: #FFFFFF;
+}
+
+.panel-title {
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 14px;
+  color: #111111;
+  border-bottom: 1px solid #CCCCCC;
+  padding-bottom: 8px;
+}
+
+/* Parameters Panel */
+.param-grid {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  row-gap: 8px;
+  column-gap: 12px;
+  font-size: 13px;
+  align-items: baseline;
+}
+
+.param-label {
+  font-weight: 600;
+  color: #555555;
+}
+
+.param-value {
+  font-family: "SF Mono", "Fira Code", Consolas, Monaco, monospace;
+  word-break: break-all;
+  color: #111111;
+}
+
+/* Controls Panel */
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-group label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #111111;
+}
+
+.control-hint {
+  font-size: 12px;
+  color: #555555;
+}
+
+input[type="number"],
+select {
+  border: 1px solid #CCCCCC;
+  background: #FFFFFF;
+  color: #111111;
+  font-family: "SF Mono", "Fira Code", Consolas, Monaco, monospace;
+  font-size: 14px;
+  padding: 8px 10px;
+  border-radius: 0;
+  outline: none;
+}
+
+input[type="number"]:focus,
+select:focus {
+  border-color: #0055FF;
+}
+
+input[type="range"] {
+  accent-color: #0055FF;
+  cursor: pointer;
+}
+
+.range-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.range-wrap input {
+  flex: 1;
+}
+
+.range-val {
+  font-family: "SF Mono", "Fira Code", Consolas, Monaco, monospace;
+  font-size: 13px;
+  min-width: 60px;
+  color: #111111;
+}
+
+.btn-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+button {
+  background-color: #111111;
+  color: #FFFFFF;
+  border: 1px solid #111111;
+  padding: 9px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background-color 0.1s, color 0.1s;
+}
+
+button:hover:not(:disabled) {
+  background-color: #0055FF;
+  border-color: #0055FF;
+}
+
+button:disabled {
+  background-color: #CCCCCC;
+  border-color: #CCCCCC;
+  color: #555555;
+  cursor: not-allowed;
+}
+
+button.btn-secondary {
+  background-color: #FFFFFF;
+  color: #111111;
+  border-color: #CCCCCC;
+}
+
+button.btn-secondary:hover:not(:disabled) {
+  background-color: #EEEEEE;
+  border-color: #111111;
+  color: #111111;
+}
+
+/* Execution & Plot Panel (2-Column Grid) */
+.exec-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .exec-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left Column: Trace */
+.trace-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.trace-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trace-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #555555;
+  letter-spacing: 0.05em;
+}
+
+.trace-value {
+  font-family: "SF Mono", "Fira Code", Consolas, Monaco, monospace;
+  font-size: 13px;
+  color: #111111;
+  word-break: break-all;
+}
+
+.op-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  font-family: "SF Mono", "Fira Code", Consolas, Monaco, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: #FFFFFF;
+  background-color: #0055FF;
+  width: fit-content;
+}
+
+.op-badge.idle {
+  background-color: #555555;
+}
+
+.op-badge.done {
+  background-color: #111111;
+}
+
+.binary-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  font-family: "SF Mono", "Fira Code", Consolas, Monaco, monospace;
+  font-size: 13px;
+  padding: 6px 8px;
+  border: 1px solid #CCCCCC;
+  background-color: #FFFFFF;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+.bit-cell {
+  padding: 1px 4px;
+  color: #555555;
+}
+
+.bit-cell.active {
+  background-color: #0055FF;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.bit-cell.done {
+  color: #111111;
+  font-weight: 600;
+}
+
+.log-box {
+  border: 1px solid #CCCCCC;
+  padding: 8px 10px;
+  font-family: "SF Mono", "Fira Code", Consolas, Monaco, monospace;
+  font-size: 11px;
+  height: 120px;
+  overflow-y: auto;
+  background: #FFFFFF;
+  color: #111111;
+  line-height: 1.4;
+}
+
+.log-entry {
+  margin-bottom: 3px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.log-entry.active-log {
+  color: #0055FF;
+  font-weight: 700;
+}
+
+/* Right Column: Canvas Plot */
+.plot-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.view-tabs {
+  display: flex;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid #CCCCCC;
+}
+
+.view-tab {
+  flex: 1;
+  background-color: #FFFFFF;
+  color: #555555;
+  border: none;
+  border-right: 1px solid #CCCCCC;
+  padding: 6px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.1s, color 0.1s;
+}
+
+.view-tab:last-child {
+  border-right: none;
+}
+
+.view-tab:hover {
+  background-color: #F4F4F4;
+  color: #111111;
+}
+
+.view-tab.active {
+  background-color: #111111;
+  color: #FFFFFF;
+}
+
+.plot-caption {
+  width: 100%;
+  max-width: 400px;
+  font-size: 11px;
+  color: #555555;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.canvas-wrapper {
+  position: relative;
+  border: 1px solid #111111;
+  background-color: #FFFFFF;
+  width: 400px;
+  height: 400px;
+}
+
+canvas#plotCanvas {
+  display: block;
+  width: 400px;
+  height: 400px;
+}
+
+.plot-legend {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #555555;
+  border: 1px solid #CCCCCC;
+  padding: 6px 10px;
+}
+
+.legend-items {
+  display: flex;
+  gap: 14px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+}
+
+.legend-swatch.current {
+  background-color: #0055FF;
+}
+
+.legend-swatch.past {
+  background-color: #111111;
+}
+
+/* Analysis Section */
+#analysis {
+  border: 1px solid #CCCCCC;
+  padding: 24px;
+  background-color: #FFFFFF;
+  line-height: 1.65;
+}
+
+#analysis h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: #111111;
+}
+
+#analysis p {
+  margin-bottom: 14px;
+  color: #111111;
+  text-align: justify;
+}
+
+#analysis p:last-child {
+  margin-bottom: 0;
+}
+
+#analysis strong {
+  color: #111111;
+}
+
+#analysis code {
+  font-family: "SF Mono", "Fira Code", Consolas, Monaco, monospace;
+  font-size: 13px;
+  background: #F4F4F4;
+  padding: 1px 4px;
+  border: 1px solid #CCCCCC;
+}
